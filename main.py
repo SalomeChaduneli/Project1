@@ -16,6 +16,7 @@ app.config['SECRET_KEY'] = 'mysecretkey'
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -43,10 +44,9 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
-        user = User.query.filter_by(username=username.data).first()
-        if user:
-            raise ValidationError('That username is taken. Please choose a different one.')
-
+        existing_user_username = User.query.filter_by(username=username.data).first()
+        if existing_user_username:
+            raise ValidationError('Please choose a different one.')
 
 class LoginForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(
@@ -68,10 +68,7 @@ def login():
 
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('home'))
-        else:
-            form.username.errors.append('Invalid username or password')
+            return redirect(url_for ('dashboard'))
 
     return render_template('login.html', form=form)
 
@@ -81,7 +78,7 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data, method='sha256')
-        new_user = User(username=form.username.data, password=hashed_password)
+        new_user = User(username=form.username.data, password_hash=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('login'))
@@ -95,5 +92,7 @@ def dashboard():
 
 
 
-if __name__ =='__main__':
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)
