@@ -3,23 +3,71 @@
 <head> 
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE-edge">
-    <meta name="viewport" content="widgth=device-widgth, initial scal"
-
-    <title>Register</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Registration Page</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+        .form-group label {
+            color: #6c757d;
+        }
+        .form-group input {
+            border-color: #28a745;
+            box-shadow: none;
+        }
+        .form-group input:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+        .btn-primary {
+            background-color: #ffc107;
+            border-color: #ffc107;
+        }
+        .btn-primary:hover {
+            background-color: #ffca2c;
+            border-color: #ffca2c;
+        }
+    
+    </style>
 </head>
 <body>
-    
-    <h1>Register Page</h1>
+    <div class="col-md-6">
+        <h1 class="mb-4 text-center">Register</h1>
+        <form method="POST" action="{{ url_for('register') }}">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.username.label() }}
+                {{ form.username(class_='form-control') }}
+                {% for error in form.username.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                {% endfor %}
+            </div>
 
-    <form method="POST" action="">
-        {{ form.hidden_tag() }}
-        {{ form.username }}
-        {{ form.password }}
-        {{ form.submit }}
-    </form>
+            <div class="form-group">
+                {{ form.password.label() }}
+                {{ form.password(class_='form-control') }}
+                {% for error in form.password.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                {% endfor %}
+            </div>
 
-    <a href="{{ url_for('login') }}">Already have an account? Log In</a>
+            <div class="form-group">
+                {{ form.confirm_password.label() }}
+                {{ form.confirm_password(class_='form-control') }}
+                {% for error in form.confirm_password.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+        </form>
+        
+        <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a>.</p>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
 </body>
 
 </html>

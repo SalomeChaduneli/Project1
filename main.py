@@ -1,10 +1,9 @@
-
 from flask import Flask, render_template, request, url_for, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import InputRequired, Length, ValidationError
+from wtforms.validators import InputRequired, Length, ValidationError, Email, EqualTo
 from flask_bcrypt import Bcrypt
 from werkzeug.security import generate_password_hash
 
@@ -36,17 +35,24 @@ class User(db.Model, UserMixin):
 
 
 class RegistrationForm(FlaskForm):
-
-    username = StringField(validators=[InputRequired(), Length(
-        min=6, max=30)], render_kw={"placeholder": "Username"})
-    password = PasswordField(validators=[InputRequired(), Length(
-        min=6, max=30)], render_kw={"placeholder": "Password"})
+    username = StringField(validators=[InputRequired(), Length(min=6, max=30)],
+                            render_kw={"placeholder": "Username"})
+    email = StringField(validators=[InputRequired(), Email(), Length(max=50)],
+                            render_kw={"placeholder": "Email"})
+    password = PasswordField(validators=[InputRequired(), Length(min=6, max=30)],
+                            render_kw={"placeholder": "Password"})
+    confirm_password = PasswordField(validators=[InputRequired(), Length(min=6, max=30),
+                            EqualTo('password', message='Passwords must match')],
+                            render_kw={"placeholder": "Confirm Password"})
+    phone_number = StringField(validators=[InputRequired(), Length(max=20)],
+                            render_kw={"placeholder": "Phone Number (Optional)"})
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
         existing_user_username = User.query.filter_by(username=username.data).first()
         if existing_user_username:
             raise ValidationError('Please choose a different one.')
+
 
 class LoginForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(
@@ -66,9 +72,12 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
 
-        if user and bcrypt.check_password_hash(user.password, form.password.data):
+        if user and bcrypt.check_password_hash(user.password_hash, form.password.data):
             login_user(user)
             return redirect(url_for ('dashboard'))
+
+        error = "Invalid username or password"
+        return render_template('login.html', form=form, error=error)
 
     return render_template('login.html', form=form)
 
@@ -77,11 +86,11 @@ def login():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        hashed_password = generate_password_hash(form.password.data, method='sha256')
-        new_user = User(username=form.username.data, password_hash=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-        return redirect(url_for('login'))
+       hashed_password = generate_password_hash(form.password.data, method='sha256')
+       new_user = User(username=form.username.data, password_hash=hashed_password)
+       db.session.add(new_user)
+       db.session.commit()
+       return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
 
