@@ -1,64 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html>
+  <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.2/css/bootstrap.min.css">
-</head>
-<body>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f5f5f5;
-        }
-        .form-group label {
-            color: #6c757d;
-        }
-        .form-group input {
-            border-color: #28a745;
-            box-shadow: none;
-        }
-        .form-group input:focus {
-            border-color: #28a745;
-            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-        }
-        .btn-primary {
-            background-color: #ffc107;
-            border-color: #ffc107;
-        }
-        .btn-primary:hover {
-            background-color: #ffca2c;
-            border-color: #ffca2c;
-        }
-    </style>
-    <div class="container my-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-4">
-                <h1 class="mb-4 text-center">Login</h1>
-                <form method="POST">
-                    {{ form.csrf_token }}
-                    <div class="mb-3">
-                        {{ form.username.label(class="form-label") }}
-                        {{ form.username(class="form-control") }}
-                        {% for error in form.username.errors %}
-                            <div class="invalid-feedback d-block">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3">
-                        {{ form.password.label(class="form-label") }}
-                        {{ form.password(class="form-control") }}
-                        {% for error in form.password.errors %}
-                            <div class="invalid-feedback d-block">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                </form>
-                <p class="mt-3">Don't have an account? <a href="{{ url_for('register') }}">Register here</a>.</p>
-            </div>
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="widgth=device-widgth, initial scal">
+    <title>Home</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  </head>
+  <body>
+    <header>
+      <nav class="navbar navbar-expand-lg navbar-light" style="background-color: green;">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link text-light" href="{{ url_for('login') }}">Home</a>
+          </li>
+          {% if current_user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link text-light" href="{{ url_for('dashboard') }}">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-light" href="{{ url_for('logout') }}">Logout</a>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{{ url_for('login') }}">Login</a>          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="{{ url_for('register') }}">Register</a>          </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </header>
+
+
+    <div class="container">
+      <h1 class="text-left">Welcome to my Flask App!</h1>
+  
+   <!-- Login form -->
+<div class="container my-5">
+  <div class="row justify-content-end">
+    <div class="col-md-6 col-lg-4">
+
+      <form method="POST" action="{{ url_for('login') }}" class="form-signin">
+        <h1 class="h4 mb-3 font-weight-normal">Please sign in</h1>
+        <label for="inputEmail" class="sr-only">Email address</label>
+        <input type="email" id="inputEmail" name="email" class="form-control" placeholder="Email address" required autofocus>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
+        <div class="checkbox mb-3">
+          <label>
+            <input type="checkbox" value="remember-me"> Remember me
+          </label>
         </div>
+        <button class="btn btn-lg btn-success btn-block" type="submit">Sign in</button>
+        <div class="text-right mt-3">
+          <a href="#" style="color: green;">Forgot Password?</a>
+        </div>
+        <div class="text-right mt-3">
+          <span>Don't have an account? </span>
+          <a href="{{ url_for('register') }}" style="color: green;">Sign Up</a>
+
+        </div>
+      </form>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-</body>
+  </div>
+</div>
+      <!-- End of login form -->
+    
+
+      <footer class="bg-success text-white py-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-12 text-center">
+              <p>&copy; 2023 - Flask App</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+      
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  </body>
 </html>
+

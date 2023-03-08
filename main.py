@@ -7,45 +7,34 @@ from wtforms.validators import InputRequired, Length, ValidationError, Email, Eq
 from flask_bcrypt import Bcrypt
 from werkzeug.security import generate_password_hash
 
-
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] ='sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'mysecretkey'
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
-
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
-
 
 @login_manager.user_loader
 def load_user(user_id):
     user = User.query.get(int(user_id))
     if user:
-        return User.query.get(int(user_id))
-
+        return user
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     password_hash = db.Column(db.String(60), nullable=False)
 
-
 class RegistrationForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(min=6, max=30)],
-                            render_kw={"placeholder": "Username"})
-    email = StringField(validators=[InputRequired(), Email(), Length(max=50)],
-                            render_kw={"placeholder": "Email"})
-    password = PasswordField(validators=[InputRequired(), Length(min=6, max=30)],
-                            render_kw={"placeholder": "Password"})
-    confirm_password = PasswordField(validators=[InputRequired(), Length(min=6, max=30),
-                            EqualTo('password', message='Passwords must match')],
-                            render_kw={"placeholder": "Confirm Password"})
-    phone_number = StringField(validators=[InputRequired(), Length(max=20)],
-                            render_kw={"placeholder": "Phone Number (Optional)"})
+    username = StringField(validators=[InputRequired(), Length(min=6, max=30)], render_kw={"placeholder": "Username"})
+    email = StringField(validators=[InputRequired(), Email(), Length(max=50)], render_kw={"placeholder": "Email"})
+    password = PasswordField(validators=[InputRequired(), Length(min=6, max=30)], render_kw={"placeholder": "Password"})
+    confirm_password = PasswordField(validators=[InputRequired(), Length(min=6, max=30), EqualTo('password', message='Passwords must match')], render_kw={"placeholder": "Confirm Password"})
+    phone_number = StringField(validators=[Length(max=20)], render_kw={"placeholder": "Phone Number (Optional)"})
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
@@ -53,17 +42,10 @@ class RegistrationForm(FlaskForm):
         if existing_user_username:
             raise ValidationError('Please choose a different one.')
 
-
 class LoginForm(FlaskForm):
-    username = StringField(validators=[InputRequired(), Length(
-        min=6, max=30)], render_kw={"placeholder": "Username"})
-    password = PasswordField(validators=[InputRequired(), Length(
-        min=6, max=30)], render_kw={"placeholder": "Password"})
+    username = StringField(validators=[InputRequired(), Length(min=6, max=30)], render_kw={"placeholder": "Username"})
+    password = PasswordField(validators=[InputRequired(), Length(min=6, max=30)], render_kw={"placeholder": "Password"})
     submit = SubmitField('Login')
-
-@app.route("/")
-def home():
-    return render_template("home.html")
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -74,32 +56,30 @@ def login():
 
         if user and bcrypt.check_password_hash(user.password_hash, form.password.data):
             login_user(user)
-            return redirect(url_for ('dashboard'))
+            return redirect(url_for('dashboard'))
 
         error = "Invalid username or password"
         return render_template('login.html', form=form, error=error)
 
     return render_template('login.html', form=form)
 
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
-    if form.validate_on_submit():
-       hashed_password = generate_password_hash(form.password.data, method='sha256')
-       new_user = User(username=form.username.data, password_hash=hashed_password)
-       db.session.add(new_user)
-       db.session.commit()
-       return redirect(url_for('login'))
-    return render_template('register.html', form=form)
 
+    if form.validate_on_submit():
+        hashed_password = generate_password_hash(form.password.data, method='sha256')
+        new_user = User(username=form.username.data, password_hash=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('login'))
+
+    return render_template('register.html', form=form)
 
 @app.route("/dashboard", methods=['GET', 'POST'])
 @login_required
 def dashboard():
     return render_template("dashboard.html")
-
-
 
 if __name__ == '__main__':
     with app.app_context():
